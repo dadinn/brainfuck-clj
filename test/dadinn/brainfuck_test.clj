@@ -1,22 +1,14 @@
 (ns dadinn.brainfuck-test
   (:require [clojure.test :refer :all]
             [clojure.string :as s]
-            [clojure.core.async :refer [chan timeout go go-loop <! <!! >! >!! close!]]
+            [clojure.core.async :as ca :refer [<!! >!! close!]]
             [dadinn.brainfuck :as bf]))
-
-(defn args2ch [& coll]
-  (let [ch (chan 1)]
-    (go
-      (doseq [v coll]
-        (>! ch v))
-      (close! ch))
-    ch))
 
 (defn ch2coll
   [ch]
   (lazy-seq
-    (if-let [v (<!! ch)]
-      (cons v (ch2coll ch)))))
+   (if-let [v (<!! ch)]
+     (cons v (ch2coll ch)))))
 
 (defn ch2str
   [ch]
@@ -95,18 +87,19 @@
 
 (deftest test-exec-helloworld
   (testing "Long \"Hello World\" program returns correct string"
-    (let [ch (bf/pipe nil helloworld-long)]
+    (let [[_ ch] (bf/exec helloworld-long)]
       (is (= "Hello World!\n" (ch2str ch)))))
   (testing "Short \"Hello World\" program returns corrent string"
-    (let [ch (bf/pipe nil helloworld-short)]
+    (let [[_ ch] (bf/exec helloworld-short)]
       (is (= "Hello World!\n" (ch2str ch))))))
 
 (deftest test-exec-copy-times
   (testing "Makes x copies of number n"
     (are [x n res]
-      (= res (-> (args2ch x n)
-                 (bf/pipe ",>,<[>.<-]")
-                 (ch2coll)))
+      (= res
+         (let [[in out] (bf/exec ",>,<[>.<-]")]
+           (ca/onto-chan in [x n])
+           (ch2coll out)))
       3 0 [0 0 0]
       0 6 []
       2 2 [2 2]
