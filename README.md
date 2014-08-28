@@ -5,7 +5,7 @@ Brainfuck interpreter written in Clojure
 ## Usage
 
 ``` clj
-(require '[clojure.core.async :as ca :refer [chan go-loop <! >! <!! >!! close!]])
+(require '[clojure.core.async :as ca :refer [to-chan <!!]])
 (require '[dadinn.brainfuck :as bf])
 
 (let [in (to-chan [1 2 3 4 5])
