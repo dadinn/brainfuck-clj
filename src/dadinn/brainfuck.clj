@@ -88,10 +88,8 @@
 
 (defmacro pipe
   [in inst & more]
-  (let [exec-expr `(exec ~in ~inst)]
-    (if (seq more)
-      `(pipe ~exec-expr ~(first more) ~@(rest more))
-      exec-expr)))
+  `(-> (exec ~in ~inst)
+     ~@(for [i more] `(exec ~i))))
 
 
 
