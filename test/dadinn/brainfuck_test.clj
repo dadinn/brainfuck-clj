@@ -87,17 +87,18 @@
 
 (deftest test-exec-helloworld
   (testing "Long \"Hello World\" program returns correct string"
-    (let [[_ ch] (bf/exec helloworld-long)]
+    (let [ch (bf/exec nil helloworld-long)]
       (is (= "Hello World!\n" (ch2str ch)))))
   (testing "Short \"Hello World\" program returns corrent string"
-    (let [[_ ch] (bf/exec helloworld-short)]
+    (let [ch (bf/exec nil helloworld-short)]
       (is (= "Hello World!\n" (ch2str ch))))))
 
 (deftest test-exec-copy-times
   (testing "Makes x copies of number n"
     (are [x n res]
       (= res
-         (let [[in out] (bf/exec ",>,<[>.<-]")]
+         (let [in (chan 1)
+               out (bf/exec in ",>,<[>.<-]")]
            (ca/onto-chan in [x n])
            (ch2coll out)))
       3 0 [0 0 0]
