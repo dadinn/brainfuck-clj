@@ -81,33 +81,17 @@
       (close! out))))
 
 (defn exec
-  [inst]
-  (let [in (chan 1)
-        out (chan 1)]
+  [in inst]
+  (let [out (chan 1)]
     (exec-with in out inst)
-    [in out]))
+    out))
 
 (defmacro pipe
-  [& insts]
-  (let [binding-forms
-        (map-indexed
-         (fn [idx inst]
-           [[(gensym (str "in" idx "_"))
-             (gensym (str "out" idx "_"))]
-            (list #'exec inst)])
-         insts)
-        
-        io-channels
-        (map first binding-forms)]
-    (concat
-     (list 'let (vec (apply concat binding-forms)))
-     (map (fn [[_ out] [in _]]
-            (list #'clojure.core.async/pipe out in))
-          io-channels
-          (rest io-channels))
-     (list
-      [(first (first io-channels))
-       (second (last io-channels))]))))
+  [in inst & more]
+  (let [exec-expr `(exec ~in ~inst)]
+    (if (seq more)
+      `(pipe ~exec-expr ~(first more) ~@(rest more))
+      exec-expr)))
 
 
 

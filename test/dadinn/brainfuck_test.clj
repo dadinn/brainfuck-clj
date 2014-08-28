@@ -1,7 +1,7 @@
 (ns dadinn.brainfuck-test
   (:require [clojure.test :refer :all]
             [clojure.string :as s]
-            [clojure.core.async :as ca :refer [<!! >!! close!]]
+            [clojure.core.async :as ca :refer [go-loop <! >! <!! >!! close! chan]]
             [dadinn.brainfuck :as bf]))
 
 (defn ch2coll
@@ -106,3 +106,20 @@
       3 4 [4 4 4]
       6 23 [23 23 23 23 23 23])))
 
+(deftest test-twice-addition
+  (testing "Adds numbers twice"
+    (are [num-vec res]
+      (= res
+         (let [in (chan 1)
+               out (bf/pipe in ",[..,]" ">,[[<+>-],]<.")]
+           (go-loop [nums num-vec]
+             (if (seq nums)
+               (do
+                 (>! in (first nums))
+                 (recur (rest nums)))
+               (close! in)))
+           (<!! out)))
+      
+      [1 2 3 4 5] 30
+      [1 2 3 4] 20
+      [34 53 2] 178)))
