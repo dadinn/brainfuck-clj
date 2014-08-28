@@ -4,7 +4,18 @@ Brainfuck interpreter written in Clojure
 
 ## Usage
 
-FIXME
+``` clj
+(require '[clojure.core.async :as ca :refer [chan go-loop <! >! <!! >!! close!]])
+(require '[dadinn.brainfuck :as bf])
+
+(let [in (to-chan [1 2 3 4 5])
+      out (bf/exec in ">,[[<+>-],]<.")]
+  (<!! out))
+
+(let [in (to-chan [1 2 3 4 5])
+      out (bf/pipe in ",[..,]" ">,[[<+>-],]<.")]
+  (<!! out))
+```
 
 ## License
 
