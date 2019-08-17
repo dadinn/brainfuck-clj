@@ -1,6 +1,6 @@
 # brainfuck
 
-Brainfuck interpreter written in Clojure
+[Brainfuck](https://en.wikipedia.org/wiki/Brainfuck#Commands) interpreter written in Clojure
 
 ## Usage
 
